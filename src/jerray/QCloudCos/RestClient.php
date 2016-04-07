@@ -11,10 +11,16 @@ class RestClient
 
     protected $domain = '';
 
+    protected $httpClient;
+
     public function __construct($options)
     {
-        if ($options['ssl']) {
+        if (isset($options['ssl']) && $options['ssl']) {
             $this->protocol = 'https://';
+        }
+
+        if (isset($options['httpClient']) && $options['httpClient']) {
+            $this->httpClient = $options['httpClient'];
         }
 
         $this->domain = $options['domain'];
@@ -60,6 +66,9 @@ class RestClient
      */
     public function getHttpClient()
     {
-        return new HttpClient();
+        if (!$this->httpClient) {
+            $this->httpClient = new HttpClient();
+        }
+        return $this->httpClient;
     }
 }

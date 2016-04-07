@@ -89,6 +89,7 @@ class QCloudCos
         $this->restClient = new RestClient([
             'ssl' => isset($options['ssl']) ? $options['ssl'] : false,
             'domain' => isset($options['domain']) ? $options['domain'] : self::DOMAIN,
+            'httpClient' => isset($options['httpClient']) ? $options['httpClient'] : null,
         ]);
     }
 
@@ -129,7 +130,7 @@ class QCloudCos
     public function upload($src, $bucket, $dest, $biz = null)
     {
         $src = realpath($src);
-        if (!file_exists($src)) {
+        if (!$src) {
             throw new Exceptions\FileNotFoundException("File {$src} not found", 404);
         }
 
