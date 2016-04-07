@@ -233,14 +233,18 @@ class QCloudCos
         $sign = $this->auth->generateOneTimeSign($src, $bucket, false);
 
         $url = $file->data->access_url . '?sign=' . $sign;
+
         if ($dest) {
+            if (file_exists($dest) && strtolower($file->data->sha) == hash_file('sha1', $dest)) {
+                return true;
+            }
             $this->restClient->getHttpClient()->request('GET', $url, [
                 'sink' => $dest
             ]);
             return true;
-        } else {
-            return $url;
         }
+
+        return $url;
     }
 
     protected function buildUrl($type, $bucket, $resource)

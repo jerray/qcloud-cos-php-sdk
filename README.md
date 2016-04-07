@@ -32,7 +32,7 @@ $cosFilePath = '/remote/file/path';
 $bizAttr = 'File attributes';
 
 try {
-    $response = $cos->uploadFile($localFilePath, $bucketName, $cosFilePath, $bizAttr);
+    $response = $cos->upload($localFilePath, $bucketName, $cosFilePath, $bizAttr);
     $code = $response->code;
     $fileUrl = $response->data->access_url;
 } catch (jerray\QCloudCos\Exceptions\ClientException $e) {
@@ -47,7 +47,7 @@ try {
 查询文件
 
 ```php
-$response = $cos->uploadFile($bucketName, $cosFilePath);
+$response = $cos->queryFile($bucketName, $cosFilePath);
 ```
 
 更新文件bizAttr
