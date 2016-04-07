@@ -155,8 +155,8 @@ class QCloudCos
     }
 
     /**
-     * queryFile
-     * 查询文件
+     * updateFile
+     * 更新文件
      *
      * @param string $bucket
      * @param string $src  远程文件名
@@ -247,11 +247,144 @@ class QCloudCos
         return $url;
     }
 
-    protected function buildUrl($type, $bucket, $resource)
+    /**
+     * createFolder
+     * 创建文件夹
+     *
+     * @param string $bucket
+     * @param string $folder 远程文件夹名 腾讯云支持递归创建文件夹
+     * @param string $biz    文件夹属性信息
+     * @throws \GuzzleHttp\Exception\ClientException 请求失败时
+     * @return string|boolean
+     */
+    public function createFolder($bucket, $folder, $biz = null)
     {
+        $url = $this->buildUrl('file', $bucket, $folder, true);
+        $sign = $this->auth->generateSign($bucket);
+
+        return $this->restClient->request('POST', $url, $sign, [
+            'json' => [
+                'op' => 'create',
+                'biz_attr' => isset($biz) ? $biz : '',
+            ]
+        ]);
+    }
+
+    /**
+     * listFolder
+     * 文件列表
+     *
+     * @param string $bucket
+     * @param string $folder    远程文件夹名 腾讯云支持递归创建文件夹
+     * @param int    $limit     单页项目数量
+     * @param string $pattern   both|folder|file
+     * @param string $context   需要翻页时传入上次请求的context，使用direction参数取前一页或后一页
+     * @param string $direction next|prev 取当前context的前一页或后一页
+     * @throws \GuzzleHttp\Exception\ClientException 请求失败时
+     * @return string|boolean
+     */
+    public function listFolder($bucket, $folder, $limit = 20, $pattern = 'both', $context = '', $direction = 'next')
+    {
+        $url = $this->buildUrl('file', $bucket, $folder);
+        $sign = $this->auth->generateSign($bucket);
+
+        switch ($pattern) {
+        case 'file':
+            $pattern = 'eListFileOnly'; break;
+        case 'folder':
+            $pattern = 'eListDirOnly'; break;
+        case 'both':
+        default:
+            $pattern = 'eListBoth';
+        }
+
+        return $this->restClient->request('GET', $url, $sign, [
+            'query' => [
+                'op' => 'list',
+                'num' => $limit,
+                'pattern' => $pattern,
+                'context' => $context,
+                'order' => $direction == 'next' ? 0 : 1,
+            ]
+        ]);
+    }
+
+    /**
+     * updateFolder
+     * 更新文件夹
+     *
+     * @param string $bucket
+     * @param string $folder  远程文件夹名
+     * @param string $biz     文件夹属性信息
+     * @throws Exceptions\ClientException 请求失败时
+     * @return object
+     */
+    public function updateFolder($bucket, $folder, $biz = null)
+    {
+        $url = $this->buildUrl('file', $bucket, $folder, true);
+        $sign = $this->auth->generateOneTimeSign($folder, $bucket);
+
+        return $this->restClient->request('POST', $url, $sign, [
+            'json' => [
+                'op' => 'update',
+                'biz_attr' => isset($biz) ? $biz : '',
+            ]
+        ]);
+    }
+
+    /**
+     * queryFolder
+     * 查询文件夹信息
+     *
+     * @param string $bucket
+     * @param string $folder  远程文件夹名
+     * @throws Exceptions\ClientException 请求失败时
+     * @return object
+     */
+    public function queryFolder($bucket, $folder)
+    {
+        $url = $this->buildUrl('file', $bucket, $folder, true);
+        $sign = $this->auth->generateSign($bucket);
+
+        return $this->restClient->request('GET', $url, $sign, [
+            'query' => ['op' => 'stat']
+        ]);
+    }
+
+    /**
+     * deleteFolder
+     * 删除文件夹 注意：文件夹不为空时会删除失败
+     *
+     * @param string $bucket
+     * @param string $folder  远程文件夹名
+     * @throws Exceptions\ClientException 请求失败时
+     * @return object
+     */
+    public function deleteFolder($bucket, $folder)
+    {
+        $url = $this->buildUrl('file', $bucket, $folder, true);
+        $sign = $this->auth->generateOneTimeSign($folder, $bucket);
+
+        return $this->restClient->request('POST', $url, $sign, [
+            'json' => [
+                'op' => 'delete',
+            ]
+        ]);
+    }
+
+    protected function buildUrl($type, $bucket, $resource, $isFolder = false)
+    {
+        $resource = ltrim($resource, '/');
+        if ($isFolder) {
+            $resource = rtrim($resource, '/');
+            if (strlen($resource) > 0) {
+                $resource = $resource . '/';
+            }
+        }
+
         return $this->apiEndPoints[$type] . '/' .
             $this->appId . '/' .
             $bucket . '/' .
-            str_replace('%2F', '/', rawurlencode(ltrim($resource, '/')));
+            str_replace('%2F', '/', rawurlencode($resource));
     }
 }

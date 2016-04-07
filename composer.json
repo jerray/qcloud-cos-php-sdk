@@ -1,10 +1,10 @@
 {
   "name": "jerray/qcloud-cos-php-sdk",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "homepage": "https://github.com/jerray/qcloud-cos-php-sdk",
   "description": "Tencentyun COS PHP SDK",
   "keywords": [
-    "tencentyun", "cos"
+    "tencentyun", "cos", "qcloud", "sdk"
   ],
   "authors": [
     {
@@ -19,7 +19,7 @@
   "license": "MIT",
   "type": "library",
   "require": {
-    "php": ">=5.3.0",
+    "php": ">=5.5.9",
     "guzzlehttp/guzzle": "^6.2"
   },
   "require-dev": {
