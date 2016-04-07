@@ -3,6 +3,8 @@ qcloud-cos-php-sdk
 
 腾讯云对象存储服务 PHP SDK
 
+[![Latest Stable Version](https://poser.pugx.org/jerray/qcloud-cos-php-sdk/v/stable)](https://packagist.org/packages/jerray/qcloud-cos-php-sdk) [![Total Downloads](https://poser.pugx.org/jerray/qcloud-cos-php-sdk/downloads)](https://packagist.org/packages/jerray/qcloud-cos-php-sdk) [![Latest Unstable Version](https://poser.pugx.org/jerray/qcloud-cos-php-sdk/v/unstable)](https://packagist.org/packages/jerray/qcloud-cos-php-sdk) [![License](https://poser.pugx.org/jerray/qcloud-cos-php-sdk/license)](https://packagist.org/packages/jerray/qcloud-cos-php-sdk) [![Build Status](https://travis-ci.org/jerray/qcloud-cos-php-sdk.svg?branch=master)](https://travis-ci.org/jerray/qcloud-cos-php-sdk)
+
 安装
 ----
 
