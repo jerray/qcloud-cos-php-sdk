@@ -63,6 +63,34 @@ class RestClientTest extends TestCase
         $restClient->request('POST', $uri, $sign);
     }
 
+    public function testClientExceptionBody()
+    {
+        $originBody = new \stdClass;
+        $key = $this->faker->md5;
+        $originBody->$key = $this->faker->userName;
+
+        $mock = new MockHandler([new Response(400, [], json_encode($originBody))]);
+        $httpClient = $this->setupHttpTestClient($mock);
+        $restClient = $this->genRestClient($httpClient);
+
+        $uri = $this->genFakeUri();
+        $sign = $this->faker->md5;
+        try {
+            $restClient->request('POST', $uri, $sign);
+        } catch (\jerray\QCloudCos\Exceptions\ClientException $e) {
+            $body = $e->getBody();
+            $this->assertEquals($originBody, $body);
+        }
+    }
+
+    public function testGetHttpClient()
+    {
+        $domain = $this->faker->domainName;
+        $restClient = new RestClient(['domain' => $domain]);
+        $httpClient = $restClient->getHttpClient();
+        $this->assertInstanceOf(HttpClient::class, $httpClient);
+    }
+
     protected function genRestClient($httpClient, $options = [])
     {
         $domain = $this->faker->domainName;

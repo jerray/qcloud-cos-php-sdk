@@ -290,13 +290,9 @@ class QCloudCos
         $sign = $this->auth->generateSign($bucket);
 
         switch ($pattern) {
-        case 'file':
-            $pattern = 'eListFileOnly'; break;
-        case 'folder':
-            $pattern = 'eListDirOnly'; break;
-        case 'both':
-        default:
-            $pattern = 'eListBoth';
+        case 'file': $pattern = 'eListFileOnly'; break;
+        case 'folder': $pattern = 'eListDirOnly'; break;
+        default: $pattern = 'eListBoth';
         }
 
         return $this->restClient->request('GET', $url, $sign, [

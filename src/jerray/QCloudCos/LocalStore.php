@@ -2,6 +2,8 @@
 
 namespace jerray\QCloudCos;
 
+use Carbon\Carbon;
+
 class LocalStore implements Contracts\Store
 {
     /**
@@ -22,7 +24,7 @@ class LocalStore implements Contracts\Store
         self::$data[$key] = [
             'value' => $value,
             'expire' => $expire,
-            'timestamp' => time(),
+            'timestamp' => Carbon::now()->timestamp,
         ];
 
         return true;
@@ -58,7 +60,7 @@ class LocalStore implements Contracts\Store
 
         $data = self::$data[$key];
 
-        if ($data['expire'] && (time() - $data['timestamp']) > $data['expire']) {
+        if ($data['expire'] && (Carbon::now()->timestamp - $data['timestamp']) > $data['expire']) {
             unset(self::$data[$key]);
             return false;
         }

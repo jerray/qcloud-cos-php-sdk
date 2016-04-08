@@ -2,6 +2,8 @@
 
 namespace jerray\QCloudCos;
 
+use Carbon\Carbon;
+
 class Auth
 {
 	/**
@@ -52,7 +54,7 @@ class Auth
             return $this->store->get($key);
         }
 
-        $expireAt = time() + $expire;
+        $expireAt = Carbon::now()->timestamp + $expire;
         $sign = $this->generateBaseSign($bucket, $expireAt);
         $this->store->set($key, $sign, $expire);
 
@@ -90,7 +92,7 @@ class Auth
     {
         $appId = $this->appId;
         $secretId = $this->secretId;
-        $current = time();
+        $current = Carbon::now()->timestamp;
         $rand = mt_rand();
 
         $src = "a={$appId}&b={$bucket}&k={$secretId}&e={$expire}&t={$current}&r={$rand}&f={$fileId}";
