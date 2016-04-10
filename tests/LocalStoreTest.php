@@ -27,7 +27,7 @@ class LocalStoreTest extends TestCase
         $key = $this->faker->userName;
         $result = $this->store->set($key, $this->faker->randomNumber);
         $this->assertTrue($result);
-	}
+    }
 
     public function testHas()
     {

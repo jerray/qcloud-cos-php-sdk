@@ -35,7 +35,7 @@ class AuthTest extends TestCase
 
         $sign2 = $this->auth->generateSign($this->bucket, 60, true);
         $this->assertNotEquals($sign, $sign2, "Sign should be regenerated");
-	}
+    }
 
     public function testGenerateOneTimeSign()
     {

@@ -87,7 +87,7 @@ class QCloudCosTest extends TestCase
         $this->assertRequestMultipartHasField($request, 'sha', $sha1);
         $this->assertRequestMultipartHasField($request, 'biz_attr', '');
         $this->assertRequestMultipartHasField($request, 'filecontent', file_get_contents($file));
-	}
+    }
 
     public function testUploadSlice()
     {
@@ -176,7 +176,7 @@ class QCloudCosTest extends TestCase
         $cos->upload($src, $this->bucket, $this->fileid);
 
         $request = $this->container[0]['request'];
-	}
+    }
 
     /**
      * @expectedException \jerray\QCloudCos\Exceptions\FileNotFoundException
@@ -192,7 +192,7 @@ class QCloudCosTest extends TestCase
         $cos->uploadSlice($src, $this->bucket, $this->fileid);
 
         $request = $this->container[0]['request'];
-	}
+    }
 
     public function testDownloadFile()
     {

@@ -11,22 +11,22 @@ class QCloudCos
      */
     const DOMAIN = 'web.file.myqcloud.com';
 
-	/**
-	 * AppID
-	 * @var string
-	 */
+    /**
+     * AppID
+     * @var string
+     */
     protected $appId;
 
-	/**
-	 * SecretID
-	 * @var string
-	 */
+    /**
+     * SecretID
+     * @var string
+     */
     protected $secretId;
 
-	/**
-	 * SecretKey
-	 * @var string
-	 */
+    /**
+     * SecretKey
+     * @var string
+     */
     protected $secretKey;
 
     /**
