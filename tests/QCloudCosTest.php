@@ -89,6 +89,79 @@ class QCloudCosTest extends TestCase
         $this->assertRequestMultipartHasField($request, 'filecontent', file_get_contents($file));
 	}
 
+    public function testUploadSlice()
+    {
+        $file = $this->genTempFile();
+        $sha1 = hash_file('sha1', $file);
+        $session = $this->faker->uuid;
+        $fileSize = filesize($file);
+
+        $sliceSize = intval($fileSize / mt_rand(2, 3));
+        $sliceCount = intval(ceil($fileSize / $sliceSize));
+
+        $preparedResponse = [
+            'code' => 0,
+            'message' => 'ok',
+            'data' => [
+                'session' => $session,
+                'offset' => 0,
+                'slice_size' => $sliceSize,
+            ]
+        ];
+
+        $queue = [new Response(200, [], json_encode($preparedResponse))];
+        for ($i = 0; $i < $sliceCount; $i++) {
+            $queue[] = new Response(200);
+        }
+
+        $mock = new MockHandler($queue);
+        $httpClient = $this->setupHttpTestClient($mock);
+        $cos = $this->genCosClient($httpClient);
+
+        $cos->uploadSlice($file, $this->bucket, $this->fileid);
+        $request = $this->container[0]['request'];
+        $contentType = $request->getHeaderLine('content-type');
+        $this->assertContains('multipart/form-data', $contentType);
+        $this->assertRequestMultipartHasField($request, 'op', 'upload_slice');
+        $this->assertRequestMultipartHasField($request, 'sha', $sha1);
+        $this->assertRequestMultipartHasField($request, 'biz_attr', '');
+
+        $content = '';
+        for ($i = 1; $i <= $sliceCount; $i++) {
+            $request = $this->container[$i]['request'];
+            $contentType = $request->getHeaderLine('content-type');
+            $this->assertContains('multipart/form-data', $contentType);
+            $this->assertRequestMultipartHasField($request, 'op', 'upload_slice');
+
+            $multipart = $this->parseMultipartBody($request->getBody());
+            $contents = $this->getMultipartFieldContents($multipart, 'filecontent');
+
+            $content .= $contents;
+        }
+
+        $this->assertEquals(file_get_contents($file), $content);
+    }
+
+    public function testUploadSliceDuplicated()
+    {
+        $file = $this->genTempFile();
+
+        $preparedResponse = [
+            'code' => 0,
+            'message' => 'ok',
+            'data' => [
+                'access_url' => $this->faker->url
+            ]
+        ];
+
+        $queue = [new Response(200, [], json_encode($preparedResponse))];
+        $mock = new MockHandler($queue);
+        $httpClient = $this->setupHttpTestClient($mock);
+        $cos = $this->genCosClient($httpClient);
+
+        $cos->uploadSlice($file, $this->bucket, $this->fileid);
+    }
+
     /**
      * @expectedException \jerray\QCloudCos\Exceptions\FileNotFoundException
      */
@@ -101,6 +174,22 @@ class QCloudCosTest extends TestCase
         $cos = $this->genCosClient($httpClient);
 
         $cos->upload($src, $this->bucket, $this->fileid);
+
+        $request = $this->container[0]['request'];
+	}
+
+    /**
+     * @expectedException \jerray\QCloudCos\Exceptions\FileNotFoundException
+     */
+    public function testUploadSliceMissingFile()
+    {
+        $src = $this->genTempFilePath();
+
+        $mock = new MockHandler([new Response(200)]);
+        $httpClient = $this->setupHttpTestClient($mock);
+        $cos = $this->genCosClient($httpClient);
+
+        $cos->uploadSlice($src, $this->bucket, $this->fileid);
 
         $request = $this->container[0]['request'];
 	}
@@ -364,6 +453,17 @@ class QCloudCosTest extends TestCase
         }
 
         return $data;
+    }
+
+    protected function getMultipartFieldContents($multipart, $fieldName)
+    {
+        foreach ($multipart as $field) {
+            if ($field['name'] == $fieldName) {
+                return $field['contents'];
+            }
+        }
+
+        return null;
     }
 
     protected function assertRequestMultipartHasField($request, $field, $contents = null)

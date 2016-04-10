@@ -2,6 +2,8 @@
 
 namespace jerray\QCloudCos;
 
+use GuzzleHttp\Psr7\LimitStream;
+
 class QCloudCos
 {
     /**
@@ -153,6 +155,147 @@ class QCloudCos
                 'contents' => fopen($src, 'r'),
             ]]
         ]);
+    }
+
+    /**
+     * uploadSlice
+     * 分片上传文件
+     *
+     * @param string $src    本地文件路径
+     * @param string $bucket
+     * @param string $dest   远程文件路径
+     * @param string $biz    文件属性信息
+     * @throws Exceptions\FileNotFoundException $src不存在时
+     * @throws Exceptions\ClientException 请求失败时
+     * @return object
+     */
+    public function uploadSlice($src, $bucket, $dest, $biz = null)
+    {
+        $preparedData = $this->prepareUploadSlice($src, $bucket, $dest, $biz);
+        if (isset($preparedData['response'])) {
+            return $preparedData['response'];
+        }
+
+        $url = $preparedData['url'];
+        $fileSize = $preparedData['fileSize'];
+        $sign = $preparedData['sign'];
+
+        $session = $preparedData['session'];
+        $sliceSize = $preparedData['sliceSize'];
+        $offset = $preparedData['offset'];
+        $totalSize = $fileSize - $offset;
+
+        // 文件切分
+        $parts = [];
+        while ($totalSize > 0) {
+            $size = $totalSize > $sliceSize ? $sliceSize : $totalSize;
+            $parts[] = [
+                'offset' => $offset,
+                'size' => $size,
+            ];
+            $offset += $size;
+            $totalSize -= $size;
+        }
+
+        // 分片上传
+        foreach ($parts as $part) {
+            $response = $this->uploadSingleSlice($src, $url, $bucket, $session, $part['offset'], $part['size']);
+        }
+
+        return $response;
+    }
+
+    /**
+     * prepareUploadSlice
+     * 准备分片上传
+     * 向服务器声明文件，获取session和分片大小
+     *
+     * @param string $src    本地文件路径
+     * @param string $bucket
+     * @param string $dest   远程文件路径
+     * @param string $biz    文件属性信息
+     * @throws Exceptions\FileNotFoundException $src不存在时
+     * @throws Exceptions\ClientException 请求失败时
+     * @return array
+     */
+    protected function prepareUploadSlice($src, $bucket, $dest, $biz = null)
+    {
+        $src = realpath($src);
+        if (!$src) {
+            throw new Exceptions\FileNotFoundException("File {$src} not found", 404);
+        }
+
+        $url = $this->buildUrl('file', $bucket, $dest);
+        $sha1 = hash_file('sha1', $src);
+        $fileSize = filesize($src);
+        $sign = $this->auth->generateSign($bucket);
+
+        $response = $this->restClient->request('POST', $url, $sign, [
+            'multipart' => [[
+                'name' => 'op',
+                'contents' => 'upload_slice',
+            ], [
+                'name' => 'filesize',
+                'contents' => (string) $fileSize,
+            ], [
+                'name' => 'sha',
+                'contents' => $sha1,
+            ], [
+                'name' => 'biz_attr',
+                'contents' => isset($biz) ? $biz : '',
+            ]]
+        ]);
+
+        $result = [];
+        if (isset($response->data->access_url)) {
+            $result['response'] = $response;
+        } else {
+            $result['url'] = $url;
+            $result['fileSize'] = $fileSize;
+            $result['sign'] = $sign;
+            $result['session'] = $response->data->session;
+            $result['sliceSize'] = $response->data->slice_size;
+            $result['offset'] = $response->data->offset;
+        }
+
+        return $result;
+    }
+
+    /**
+     * uploadSingleSlice
+     * 上传单个分片
+     *
+     * @param string $src     本地文件路径
+     * @param string $url     完整请求链接
+     * @param string $bucket
+     * @param string $session
+     * @param int    $offset  分片文件位移
+     * @param int    $size    分片大小
+     * @throws Exceptions\ClientException 请求失败时
+     * @return object
+     */
+    protected function uploadSingleSlice($src, $url, $bucket, $session, $offset, $size)
+    {
+        $sign = $this->auth->generateSign($bucket);
+        $stream = new LimitStream(\GuzzleHttp\Psr7\stream_for(fopen($src, 'r')), $size, $offset);
+
+        $response = $this->restClient->request('POST', $url, $sign, [
+            'multipart' => [[
+                'name' => 'op',
+                'contents' => 'upload_slice',
+            ], [
+                'name' => 'filecontent',
+                'contents' => $stream,
+            ], [
+                'name' => 'session',
+                'contents' => $session,
+            ], [
+                'name' => 'offset',
+                'contents' => (string) $offset,
+            ]]
+        ]);
+
+        return $response;
     }
 
     /**

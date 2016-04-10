@@ -1,7 +1,7 @@
 qcloud-cos-php-sdk
 ===========
 
-腾讯云对象存储服务 PHP SDK
+腾讯云[对象存储服务 COS](http://www.qcloud.com/wiki/COS%E4%BA%A7%E5%93%81%E4%BB%8B%E7%BB%8D) PHP SDK
 
 [![Latest Stable Version](https://poser.pugx.org/jerray/qcloud-cos-php-sdk/v/stable)](https://packagist.org/packages/jerray/qcloud-cos-php-sdk) [![Total Downloads](https://poser.pugx.org/jerray/qcloud-cos-php-sdk/downloads)](https://packagist.org/packages/jerray/qcloud-cos-php-sdk) [![Latest Unstable Version](https://poser.pugx.org/jerray/qcloud-cos-php-sdk/v/unstable)](https://packagist.org/packages/jerray/qcloud-cos-php-sdk) [![License](https://poser.pugx.org/jerray/qcloud-cos-php-sdk/license)](https://packagist.org/packages/jerray/qcloud-cos-php-sdk) [![Build Status](https://travis-ci.org/jerray/qcloud-cos-php-sdk.svg?branch=master)](https://travis-ci.org/jerray/qcloud-cos-php-sdk) [![Coverage Status](https://coveralls.io/repos/github/jerray/qcloud-cos-php-sdk/badge.svg?branch=master)](https://coveralls.io/github/jerray/qcloud-cos-php-sdk?branch=master)
 
@@ -28,11 +28,11 @@ $options = [
 $cos = new jerray\QCloudCos\QCloudCos($options);
 ```
 
+各接口返回结果详情参见腾讯云对象存储服务 [RESTful API文档](http://www.qcloud.com/wiki/RESTful_API%E6%96%87%E6%A1%A3)
+
 ### 文件操作
 
-接口返回结果详情参见腾讯云对象存储服务文档 [文件操作](http://www.qcloud.com/doc/product/227/%E6%96%87%E4%BB%B6%E6%93%8D%E4%BD%9C)
-
-上传文件
+完整上传
 
 ```php
 $localFilePath = '/path/to/a/local/file';
@@ -51,6 +51,13 @@ try {
 } catch (Exception $e) {
     // ...
 }
+```
+
+分片上传（超过一定大小的文件需要使用分片上传）
+
+```php
+// response为最后一片的响应，与完整上传结构相同
+$response = $cos->uploadSlice($localFilePath, $bucketName, $cosFilePath, $bizAttr);
 ```
 
 查询文件
@@ -78,8 +85,6 @@ $result = $cos->downloadFile($bucketName, $cosFilePath, $localFilePath);
 ```
 
 ### 目录操作
-
-接口返回结果详情参见腾讯云对象存储服务文档 [目录操作](http://www.qcloud.com/doc/product/227/%E7%9B%AE%E5%BD%95%E6%93%8D%E4%BD%9C)
 
 创建目录
 
