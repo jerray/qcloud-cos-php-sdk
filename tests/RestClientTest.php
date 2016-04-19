@@ -63,7 +63,35 @@ class RestClientTest extends TestCase
         $restClient->request('POST', $uri, $sign);
     }
 
-    public function testClientExceptionBody()
+    /**
+     * @expectedException \jerray\QCloudCos\Exceptions\ServerException
+     */
+    public function testServerException()
+    {
+        $mock = new MockHandler([new Response(500)]);
+        $httpClient = $this->setupHttpTestClient($mock);
+        $restClient = $this->genRestClient($httpClient);
+
+        $uri = $this->genFakeUri();
+        $sign = $this->faker->md5;
+        $restClient->request('POST', $uri, $sign);
+    }
+
+    /**
+     * @expectedException \jerray\QCloudCos\Exceptions\RequestException
+     */
+    public function testRequestException()
+    {
+        $mock = new MockHandler([new Response(700)]);
+        $httpClient = $this->setupHttpTestClient($mock);
+        $restClient = $this->genRestClient($httpClient);
+
+        $uri = $this->genFakeUri();
+        $sign = $this->faker->md5;
+        $restClient->request('POST', $uri, $sign);
+    }
+
+    public function testRequestExceptionBody()
     {
         $originBody = new \stdClass;
         $key = $this->faker->md5;
@@ -77,7 +105,7 @@ class RestClientTest extends TestCase
         $sign = $this->faker->md5;
         try {
             $restClient->request('POST', $uri, $sign);
-        } catch (\jerray\QCloudCos\Exceptions\ClientException $e) {
+        } catch (\jerray\QCloudCos\Exceptions\RequestException $e) {
             $body = $e->getBody();
             $this->assertEquals($originBody, $body);
         }

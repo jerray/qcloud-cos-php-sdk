@@ -4,6 +4,8 @@ namespace jerray\QCloudCos;
 
 use GuzzleHttp\Client as HttpClient;
 use GuzzleHttp\Exception\ClientException;
+use GuzzleHttp\Exception\ServerException;
+use GuzzleHttp\Exception\RequestException;
 
 class RestClient
 {
@@ -34,6 +36,8 @@ class RestClient
      * @param string $sign
      * @param array  $userOptions
      * @throws Exceptions\ClientException 请求出现400+错误时抛出
+     * @throws Exceptions\ServerException 请求出现500+错误时抛出
+     * @throws Exceptions\RequestException 请求出现其他错误时抛出
      * @return object
      */
     public function request($method, $uri, $sign, $userOptions = [])
@@ -49,14 +53,15 @@ class RestClient
         try {
             $response = $httpClient->request($method, $url, $options);
             $body = json_decode((string) $response->getBody());
-            return $body;
         } catch (ClientException $e) {
-            $response = $e->getResponse();
-            $body = json_decode((string) $response->getBody());
-            $exception = new Exceptions\ClientException($e->getMessage(), $e->getCode());
-            $exception->setBody($body);
-            throw $exception;
+            $this->throwRequestException($e, Exceptions\ClientException::class);
+        } catch (ServerException $e) {
+            $this->throwRequestException($e, Exceptions\ServerException::class);
+        } catch (RequestException $e) {
+            $this->throwRequestException($e, Exceptions\RequestException::class);
         }
+
+        return $body;
     }
 
     /**
@@ -70,5 +75,23 @@ class RestClient
             $this->httpClient = new HttpClient();
         }
         return $this->httpClient;
+    }
+
+    /**
+     * throwRequestException
+     *
+     * @param \GuzzleHttp\Exception\RequestException $e
+     * @param string $className
+     * @throws Exceptions\RequestException
+     */
+    protected function throwRequestException($e, $className)
+    {
+        $response = $e->getResponse();
+        $rawBody = (string) $response->getBody();
+        $body = json_decode((string) $rawBody);
+        $body = $body === null ? $rawBody : $body;
+        $exception = new $className($e->getMessage(), $e->getCode());
+        $exception->setBody($body);
+        throw $exception;
     }
 }

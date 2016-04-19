@@ -2,6 +2,6 @@
 
 namespace jerray\QCloudCos\Exceptions;
 
-class ClientException extends RequestException
+class ServerException extends RequestException
 {
 }

@@ -126,7 +126,7 @@ class QCloudCos
      * @param string $dest   远程文件路径
      * @param string $biz    文件属性信息
      * @throws Exceptions\FileNotFoundException $src不存在时
-     * @throws Exceptions\ClientException 请求失败时
+     * @throws Exceptions\RequestException 请求失败时
      * @return object
      */
     public function upload($src, $bucket, $dest, $biz = null)
@@ -166,7 +166,7 @@ class QCloudCos
      * @param string $dest   远程文件路径
      * @param string $biz    文件属性信息
      * @throws Exceptions\FileNotFoundException $src不存在时
-     * @throws Exceptions\ClientException 请求失败时
+     * @throws Exceptions\RequestException 请求失败时
      * @return object
      */
     public function uploadSlice($src, $bucket, $dest, $biz = null)
@@ -215,7 +215,7 @@ class QCloudCos
      * @param string $dest   远程文件路径
      * @param string $biz    文件属性信息
      * @throws Exceptions\FileNotFoundException $src不存在时
-     * @throws Exceptions\ClientException 请求失败时
+     * @throws Exceptions\RequestException 请求失败时
      * @return array
      */
     protected function prepareUploadSlice($src, $bucket, $dest, $biz = null)
@@ -271,7 +271,7 @@ class QCloudCos
      * @param string $session
      * @param int    $offset  分片文件位移
      * @param int    $size    分片大小
-     * @throws Exceptions\ClientException 请求失败时
+     * @throws Exceptions\RequestException 请求失败时
      * @return object
      */
     protected function uploadSingleSlice($src, $url, $bucket, $session, $offset, $size)
@@ -305,7 +305,7 @@ class QCloudCos
      * @param string $bucket
      * @param string $src  远程文件名
      * @param string $biz  文件属性信息
-     * @throws Exceptions\ClientException 请求失败时
+     * @throws Exceptions\RequestException 请求失败时
      * @return object
      */
     public function updateFile($bucket, $src, $biz = null)
@@ -327,7 +327,7 @@ class QCloudCos
      *
      * @param string $bucket
      * @param string $src  远程文件名
-     * @throws Exceptions\ClientException 请求失败时
+     * @throws Exceptions\RequestException 请求失败时
      * @return object
      */
     public function queryFile($bucket, $src)
@@ -346,7 +346,7 @@ class QCloudCos
      *
      * @param string $bucket
      * @param string $src  远程文件名
-     * @throws Exceptions\ClientException 请求失败时
+     * @throws Exceptions\RequestException 请求失败时
      * @return object
      */
     public function deleteFile($bucket, $src)
@@ -368,7 +368,7 @@ class QCloudCos
      * @param string $bucket
      * @param string $src  远程文件名
      * @param string $dest (optional) 本地文件路径
-     * @throws \GuzzleHttp\Exception\ClientException 请求失败时
+     * @throws \GuzzleHttp\Exception\RequestException 请求失败时
      * @return string|boolean
      */
     public function downloadFile($bucket, $src, $dest = null)
@@ -398,7 +398,7 @@ class QCloudCos
      * @param string $bucket
      * @param string $folder 远程文件夹名 腾讯云支持递归创建文件夹
      * @param string $biz    文件夹属性信息
-     * @throws \GuzzleHttp\Exception\ClientException 请求失败时
+     * @throws \GuzzleHttp\Exception\RequestException 请求失败时
      * @return string|boolean
      */
     public function createFolder($bucket, $folder, $biz = null)
@@ -424,7 +424,7 @@ class QCloudCos
      * @param string $pattern   both|folder|file
      * @param string $context   需要翻页时传入上次请求的context，使用direction参数取前一页或后一页
      * @param string $direction next|prev 取当前context的前一页或后一页
-     * @throws \GuzzleHttp\Exception\ClientException 请求失败时
+     * @throws \GuzzleHttp\Exception\RequestException 请求失败时
      * @return string|boolean
      */
     public function listFolder($bucket, $folder, $limit = 20, $pattern = 'both', $context = '', $direction = 'next')
@@ -456,7 +456,7 @@ class QCloudCos
      * @param string $bucket
      * @param string $folder  远程文件夹名
      * @param string $biz     文件夹属性信息
-     * @throws Exceptions\ClientException 请求失败时
+     * @throws Exceptions\RequestException 请求失败时
      * @return object
      */
     public function updateFolder($bucket, $folder, $biz = null)
@@ -478,7 +478,7 @@ class QCloudCos
      *
      * @param string $bucket
      * @param string $folder  远程文件夹名
-     * @throws Exceptions\ClientException 请求失败时
+     * @throws Exceptions\RequestException 请求失败时
      * @return object
      */
     public function queryFolder($bucket, $folder)
@@ -497,7 +497,7 @@ class QCloudCos
      *
      * @param string $bucket
      * @param string $folder  远程文件夹名
-     * @throws Exceptions\ClientException 请求失败时
+     * @throws Exceptions\RequestException 请求失败时
      * @return object
      */
     public function deleteFolder($bucket, $folder)
