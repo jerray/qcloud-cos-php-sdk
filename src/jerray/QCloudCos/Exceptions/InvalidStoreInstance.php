@@ -2,8 +2,6 @@
 
 namespace jerray\QCloudCos\Exceptions;
 
-use Exception;
-
-class InvalidStoreInstance extends Exception
+class InvalidStoreInstance extends RuntimeException
 {
 }

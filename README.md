@@ -44,7 +44,7 @@ try {
     $response = $cos->upload($localFilePath, $bucketName, $cosFilePath, $bizAttr);
     $code = $response->code;
     $fileUrl = $response->data->access_url;
-} catch (jerray\QCloudCos\Exceptions\ClientException $e) {
+} catch (jerray\QCloudCos\Exceptions\RequestException $e) {
     $response = $e->getBody();
     $httpMessage = $e->getMessage();
     $httpCode = $e->getCode();
@@ -134,6 +134,21 @@ $response = $cos->queryFolder($bucketName, 'test/');
 ```php
 $response = $cos->deleteFolder($bucketName, 'test/');
 ```
+
+### Exceptions
+
+接口请求异常
+
+接口返回4xx错误时，抛出 `jerray\QCloudCos\Exceptions\ClientException`。
+返回5xx错误时， 抛出 `jerray\QCloudCos\Exceptions\ServerException`。
+这两个异常均继承自 `jerray\QCloudCos\Exceptions\RequestException`。
+
+运行时异常
+
+涉及到本地文件读取的接口，如果本地文件不存在或读取失败，会抛出 `jerray\QCloudCos\Exceptions\FileNotFoundException`。
+创建实例时，如果传入的自定义存储（参数`store`，可选参数）没有实现 `jerray\QCloudCos\Contracts\Store` 接口，
+抛出 `jerray\QCloudCos\Exceptions\InvalidStoreInstance` 。
+这两个异常均继承自 `jerray\QCloudCos\Exceptions\RuntimeException`。
 
 License
 --------------
